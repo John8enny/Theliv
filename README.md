@@ -6,7 +6,7 @@ Decentralized Evidence Portal
 'node index.js' to start the api server
 
 `wget https://dlcdn.apache.org/tika/3.1.0/tika-server-standard-3.1.0.jar` to download tika server
-'java -jar gtika-server-standard-3.1.0.jar --port 9998' to start the apache tika server
+run `java -jar gtika-server-standard-3.1.0.jar --port 9998` to start the apache tika server
 
 `ipfs daemon` to start ipfs server
 
