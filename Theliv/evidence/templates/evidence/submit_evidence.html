@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="container">
+    <div class="card">
+        <header class="card-header">
+            <h2 class="card-title">Submit Evidence</h2>
+        </header>
+        <div class="card-body">
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="evidenceForm" class="evidence-form">
+                {% csrf_token %}
+
+                <div class="form-section">
+                    <h3 class="section-title">Basic Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_evd_name" class="form-label">Evidence Name</label>
+                            {{ form.evd_name }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_case_num" class="form-label">Case Number</label>
+                            {{ form.case_num }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_file" class="form-label">Upload File</label>
+                        {{ form.file }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_description" class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_file_type" class="form-label">File Type</label>
+                        {{ form.file_type }}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Auto-generated Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_evd_id" class="form-label">Evidence ID</label>
+                            {{ form.evd_id }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_cid" class="form-label">CID (IPFS)</label>
+                            {{ form.cid }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_file_hash" class="form-label">File Hash (SHA-256)</label>
+                        {{ form.file_hash }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_metadata" class="form-label">Metadata</label>
+                        {{ form.metadata }}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Custom Data</h3>
+                    <div id="custom-fields" class="custom-fields"></div>
+                    <button type="button" id="add-field-btn" class="btn btn-secondary">
+                        <i class="icon-plus"></i> Add New Field
+                    </button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="icon-save"></i> Submit Evidence
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('add-field-btn').addEventListener('click', function () {
+        const index = document.querySelectorAll('.custom-field').length + 1;
+        const fieldHTML = `
+            <div class="custom-field form-row">
+                <div class="form-group">
+                    <input type="text" name="custom_field_name_${index}" placeholder="Field Name" required class="form-control" />
+                </div>
+                <div class="form-group">
+                    <input type="text" name="custom_field_value_${index}" placeholder="Field Value" required class="form-control" />
+                </div>
+            </div>
+        `;
+        document.getElementById('custom-fields').insertAdjacentHTML('beforeend', fieldHTML);
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Set Up TOTP</h2>
+{% if qr_image %}
+  <p>Scan this QR code with your authenticator app:</p>
+  <img src="data:image/png;base64,{{ qr_image }}" alt="TOTP QR Code">
+  <p>Once set up, use the code from your app to log in.</p>
+  <a href="{% url 'login' %}">Back to Login</a>
+{% else %}
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Generate TOTP Device</button>
+  </form>
+{% endif %}
+{% endblock %}

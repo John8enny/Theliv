@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="container">
+    <div class="card">
+        <header class="card-header">
+            <h2 class="card-title">View Evidence</h2>
+        </header>
+        <div class="card-body">
+            <form method="get" action="{% url 'view_evidence' %}" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_evidence_number" class="form-label">Evidence Number</label>
+                        {{ form.evidence_number }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_case_number" class="form-label">Case Number</label>
+                        {{ form.case_number }}
+                    </div>
+
+                    <div class="form-group form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="icon-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <hr class="divider">
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if single_evidence %}
+            <div class="evidence-details">
+                <h3 class="section-title">Evidence Details</h3>
+                <div class="evidence-card">
+                    <div class="evidence-info">
+                        <div class="info-row">
+                            <span class="info-label">Evidence ID:</span>
+                            <span class="info-value">{{ single_evidence.id }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Case Number:</span>
+                            <span class="info-value">{{ single_evidence.case_num }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Evidence Name:</span>
+                            <span class="info-value">{{ single_evidence.evd_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Description:</span>
+                            <span class="info-value">{{ single_evidence.description }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">File Type:</span>
+                            <span class="info-value">{{ single_evidence.file_type }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Submitted By:</span>
+                            <span class="info-value">{{ single_evidence.added_by_django }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Timestamp:</span>
+                            <span class="info-value">{{ single_evidence.timestamp }}</span>
+                        </div>
+                    </div>
+                    <div class="evidence-actions">
+                        <a href="{% url 'preview_evidence' single_evidence.id %}" class="btn btn-primary">
+                            <i class="icon-eye"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% elif evidence_list %}
+            <div class="evidence-list">
+                <h3 class="section-title">Evidence List for Case: {{ form.cleaned_data.case_number }}</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Evidence ID</th>
+                                <th>Evidence Name</th>
+                                <th>Submitted By</th>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evidence in evidence_list %}
+                            <tr>
+                                <td>{{ evidence.id }}</td>
+                                <td>{{ evidence.evd_name }}</td>
+                                <td>{{ evidence.added_by_django }}</td>
+                                <td>{{ evidence.timestamp }}</td>
+                                <td>
+                                    <a href="{% url 'preview_evidence' evidence.id %}" class="btn btn-sm btn-primary">
+                                        <i class="icon-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}
+

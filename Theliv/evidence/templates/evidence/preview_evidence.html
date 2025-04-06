@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="container">
+    <div class="card">
+        <header class="card-header">
+            <h2 class="card-title">Preview Evidence</h2>
+        </header>
+        <div class="card-body">
+            <div class="evidence-details">
+                <div class="evidence-info">
+                    <div class="info-row">
+                        <span class="info-label">Evidence ID:</span>
+                        <span class="info-value">{{ evidence.id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">CID (IPFS):</span>
+                        <span class="info-value code">{{ evidence.cid }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Hash:</span>
+                        <span class="info-value code">{{ evidence.file_hash }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Evidence Name:</span>
+                        <span class="info-value">{{ evidence.evd_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Case Number:</span>
+                        <span class="info-value">{{ evidence.case_num }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Description:</span>
+                        <span class="info-value">{{ evidence.description }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Type:</span>
+                        <span class="info-value">{{ evidence.file_type }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Metadata:</span>
+                        <span class="info-value code">{{ evidence.metadata }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Custom Data:</span>
+                        <span class="info-value">{{ evidence.custom_data }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Submitted By:</span>
+                        <span class="info-value">{{ evidence.added_by_django }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Timestamp:</span>
+                        <span class="info-value">{{ evidence.timestamp }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if preview_supported %}
+            <div class="preview-container">
+                <h3 class="section-title">File Preview</h3>
+                <div class="file-preview">
+                    {% if file_type in "jpg jpeg png gif" %}
+                    <img src="http://127.0.0.1:8080/ipfs/{{ evidence.cid }}" alt="Image Preview" class="preview-image" />
+                    {% elif file_type in "mp4 avi mkv" %}
+                    <video class="preview-video" controls>
+                        <source src="http://127.0.0.1:8080/ipfs/{{ evidence.cid }}" type="video/{{ file_type }}">
+                        Your browser does not support video playback.
+                    </video>
+                    {% elif file_type in "mp3 wav" %}
+                    <audio class="preview-audio" controls>
+                        <source src="http://127.0.0.1:8080/ipfs/{{ evidence.cid }}" type="audio/{{ file_type }}">
+                        Your browser does not support audio playback.
+                    </audio>
+                    {% elif file_type == "pdf" %}
+                        <iframe src="http://127.0.0.1:8080/ipfs/{{ evidence.cid }}" class="preview-document"></iframe>
+                    {% elif file_type == "txt" %}
+                        <iframe src="http://127.0.0.1:8080/ipfs/{{ evidence.cid }}#view=FitH" class="preview-document"></iframe>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-preview">
+                <p>File preview is not available for this format.</p>
+            </div>
+            {% endif %}
+
+            <div class="actions">
+                <a href="{% url 'submit_evidence' %}" class="btn btn-primary">
+                    <i class="icon-plus"></i> Submit New Evidence
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+

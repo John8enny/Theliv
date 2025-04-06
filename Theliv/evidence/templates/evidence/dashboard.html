@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="container">
+    <div class="card">
+        <header class="card-header">
+            <h2>Dashboard</h2>
+        </header>
+        <div class="card-body">
+            <!-- Welcome Message with Styling -->
+            <h1 class="welcome-message">Welcome back, {{ username }}!</h1>
+            
+
+            <!-- Evidence Count -->
+            <article class="alert" role="alert">
+                You have <strong>{{ evidence_count }}</strong> evidence item(s) assigned to you.
+            </article>
+
+            <div class="chart-container">
+                <section class="chart-section">
+                    <h3>Evidence by File Type</h3>
+                    <canvas id="fileTypeChart" width="400" height="200"></canvas>
+                </section>
+            
+                <section class="chart-section">
+                    <h3>Evidence Over Time (Last 30 Days)</h3>
+                    <canvas id="timeChart" width="400" height="200"></canvas>
+                </section>
+            </div>
+
+            <!-- Evidence List with Preview Links -->
+            {% if user_evidences %}
+                <section class="evidence-list">
+                    <h3>Your Evidence</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Evidence ID</th>
+                                <th>Evidence Name</th>
+                                <th>Case Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evidence in user_evidences %}
+                            <tr>
+                                <td>{{ evidence.id }}</td>
+                                <td>{{ evidence.evd_name }}</td>
+                                <td>{{ evidence.case_num }}</td>
+                                <td>
+                                    <a href="{% url 'preview_evidence' evd_id=evidence.id %}" class="btn primary">
+                                        <i class="icon-eye"></i> Preview
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            {% else %}
+                <p>No evidence assigned to you yet.</p>
+            {% endif %}
+
+            <hr class="divider">
+
+           
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- JSON Data -->
+{{ file_types|json_script:"file_types" }}
+{{ file_type_data|json_script:"file_type_data" }}
+{{ dates|json_script:"dates" }}
+{{ counts|json_script:"counts" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse JSON data with fallbacks
+        const fileTypes = JSON.parse(document.getElementById('file_types')?.textContent || '["No Data"]');
+        const fileTypeData = JSON.parse(document.getElementById('file_type_data')?.textContent || '[0]');
+        const dates = JSON.parse(document.getElementById('dates')?.textContent || '["' + new Date().toISOString().split('T')[0] + '"]');
+        const counts = JSON.parse(document.getElementById('counts')?.textContent || '[0]');
+
+        // Bar Chart: Evidence by File Type
+        const fileTypeCtx = document.getElementById('fileTypeChart').getContext('2d');
+        new Chart(fileTypeCtx, {
+            type: 'bar',
+            data: {
+                labels: fileTypes.map(t => t || 'Unknown'),
+                datasets: [{
+                    label: 'Number of Evidences',
+                    data: fileTypeData,
+                    backgroundColor: '#2c5282',
+                    borderColor: '#2b6cb0',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Count' } },
+                    x: { title: { display: true, text: 'File Type' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Line Chart: Evidence Over Time
+        const timeCtx = document.getElementById('timeChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Evidence Added',
+                    data: counts,
+                    borderColor: '#2c5282',
+                    backgroundColor: 'rgba(44, 82, 130, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Count' } },
+                    x: { title: { display: true, text: 'Date' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .welcome-message {
+        font-size: 2.5em;
+        font-family: 'Georgia', serif;
+        color: #2c5282;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+    
+    .alert {
+        font-size: 1.2em; /* Slightly larger text */
+        font-family: 'Arial', sans-serif; /* Different font */
+        color: #155e75; /* Dark teal color */
+        background-color: #e6fffa; /* Light teal background */
+        border: 1px solid #2dd4bf; /* Teal border */
+        border-radius: 8px; /* Rounded corners */
+        padding: 1rem; /* Consistent padding */
+        text-align: center; /* Centered text */
+        margin-bottom: 1.5rem; /* Spacing below */
+    }
+    .alert strong {
+        color: #0d9488; /* Bolder teal for the number */
+        font-weight: bold; /* Ensure emphasis */
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .btn.primary {
+        background-color: #2c5282;
+        color: white;
+        padding: 5px 10px;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    .btn.primary:hover {
+        background-color: #2b6cb0;
+    }
+
+    .chart-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap; /* Allows wrapping if screen is too narrow */
+    }
+    .chart-section {
+        flex: 1;
+        min-width: 300px; /* Minimum width to prevent squashing */
+        margin-bottom: 1rem;
+    }
+    .chart-section h3 {
+        margin-bottom: 0.5rem;
+    }
+    canvas {
+        max-width: 100%;
+    }
+</style>
+{% endblock %}

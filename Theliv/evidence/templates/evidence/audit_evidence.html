@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="container">
+    <div class="card">
+        <header class="card-header">
+            <h2 class="card-title">Audit Evidence</h2>
+        </header>
+        <div class="card-body">
+            <form method="get" action="{% url 'audit_evidence' %}" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_evidence_number" class="form-label">Evidence Number</label>
+                        {{ form.evidence_number }}
+                    </div>
+                    <div class="form-group form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="icon-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <hr class="divider">
+
+            {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            {% if history_data %}
+            <div class="audit-details">
+                <h3 class="section-title">Audit Trail for Evidence: {{ history_data.0.evidence.id }}</h3>
+                <div class="roadmap">
+                    <div class="timeline">
+                        {% for event in history_data %}
+                        <div class="timeline-event">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Transfer Event</h4>
+                                <p><strong>Transaction ID:</strong> {{ event.txId }}</p>
+                                <p><strong>Timestamp:</strong> {{ event.formatted_timestamp }} UTC</p>
+                                <p><strong>Owner:</strong> {{ event.addedByDjango }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<style>
+.roadmap {
+    position: relative;
+    margin: 20px 0;
+}
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    background-color: #007bff;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+}
+.timeline-event {
+    position: relative;
+    margin: 20px 0;
+    padding-left: 40px;
+}
+.timeline-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #007bff;
+    border-radius: 50%;
+    left: 16px;
+    top: 8px;
+}
+.timeline-content {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.timeline-content h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+.timeline-content p {
+    margin: 5px 0;
+    color: #666;
+}
+</style>
+{% endblock %}
