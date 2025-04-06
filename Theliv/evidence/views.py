@@ -24,6 +24,12 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.contrib.auth.decorators import login_required
 from tika import parser
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
+from reportlab.lib.styles import getSampleStyleSheet
+import io
 
 FABLO_API_URL = "http://localhost:3000/evidence/add"
 
@@ -220,13 +226,86 @@ def preview_evidence(request, evd_id):
     file_type = evidence.file_type.lower()
     preview_supported = file_type in ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'avi', 'mkv', 'mp3', 'wav', 'pdf', 'txt']
 
+        # Handle PDF export
+    if 'export_pdf' in request.GET:
+        # Create a PDF response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="evidence_{evd_id}.pdf"'
+
+        # Buffer to hold PDF data
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=20, bottomMargin=20)
+        styles = getSampleStyleSheet()
+        elements = []
+
+        # Title
+        elements.append(Paragraph("Evidence Details", styles['Title']))
+        elements.append(Spacer(1, 20))
+
+        # Evidence details as a table
+        data = [
+            ["Field", "Value"],
+            ["Evidence ID", evidence.id],
+            ["CID (IPFS)", evidence.cid],
+            ["File Hash", evidence.file_hash],
+            ["Evidence Name", evidence.evd_name],
+            ["Case Number", evidence.case_num],
+            ["Description", evidence.description or "N/A"],
+            ["File Type", evidence.file_type],
+            ["Submitted By", evidence.added_by_django],
+            ["Timestamp", str(evidence.timestamp)],
+        ]
+        evidence_table = Table(data, colWidths=[150, 350])
+        evidence_table.setStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        elements.append(evidence_table)
+        elements.append(Spacer(1, 20))  # Space before next section
+
+        # Metadata
+        elements.append(Paragraph("Metadata", styles['Heading2']))
+        elements.append(Spacer(1, 12))
+        metadata_data = [["Key", "Value"]] + [[k, str(v)] for k, v in evidence.metadata.items()]
+        metadata_table = Table(metadata_data, colWidths=[150, 350])
+        metadata_table.setStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        elements.append(metadata_table)
+        elements.append(Spacer(1, 20))  # Space before next section
+
+        # Custom Data
+        if evidence.custom_data:
+            elements.append(Paragraph("Custom Data", styles['Heading2']))
+            elements.append(Spacer(1, 12))
+            custom_data_str = json.dumps(evidence.custom_data, indent=2)
+            elements.append(Paragraph(custom_data_str, styles['Normal']))
+
+        # Build PDF
+        doc.build(elements)
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+        return response
+
     return render(request, 'evidence/preview_evidence.html', {
         'evidence': evidence,
         'preview_supported': preview_supported,
         'file_type': file_type,
     })
-    pass
-
 def view_evidence(request):
     form = SearchForm(request.GET)
     evidence_list = None
