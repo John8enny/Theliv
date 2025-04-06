@@ -86,8 +86,8 @@
             {% endif %}
 
             <div class="actions">
-                <a href="{% url 'submit_evidence' %}" class="btn btn-primary">
-                    <i class="icon-plus"></i> Submit New Evidence
+                <a href="{% url 'preview_evidence' evd_id=evidence.id %}?export_pdf=1" class="btn btn-primary">
+                    <i class="icon-download"></i> Export as PDF
                 </a>
             </div>
         </div>
