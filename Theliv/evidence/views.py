@@ -422,6 +422,16 @@ FABLO_GET_HISTORY_API_URL = "http://localhost:3000/evidence/history/"
 
 @login_required
 def audit_evidence(request):
+    
+    # Check access permissions
+    is_superuser = request.user.is_superuser
+    is_admin = request.user.groups.filter(name='admin').exists()
+    is_judiciary = request.user.groups.filter(name='judiciary').exists()
+
+    if not (is_superuser or is_admin or is_judiciary):
+        messages.error(request, "You do not have permission to audit evidence.")
+        return redirect('dashboard')  # Redirect to a safe page
+    
     form = SearchForm(request.GET or None)
     history_data = None
     error_message = None
