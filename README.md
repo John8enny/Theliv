@@ -1,14 +1,29 @@
 # Theliv
 Decentralized Evidence Portal
 
-`fablo up` to up the Hyperledger fabric network
+```bash
+fablo up
+```
+to up the Hyperledger fabric network
 
-'node index.js' to start the api server
+```bash
+node index.js
+```
+to start the api server
 
-`wget https://dlcdn.apache.org/tika/3.1.0/tika-server-standard-3.1.0.jar` to download tika server
-run `java -jar gtika-server-standard-3.1.0.jar --port 9998` to start the apache tika server
+```bash
+wget https://dlcdn.apache.org/tika/3.1.0/tika-server-standard-3.1.0.jar
+```
+to download tika server run 
+```bash
+java -jar gtika-server-standard-3.1.0.jar --port 9998
+```
+to start the apache tika server
 
-`ipfs daemon` to start ipfs server
+```bash
+ipfs daemon
+```
+to start ipfs server
 
 start a venv
 install requirement.txt
